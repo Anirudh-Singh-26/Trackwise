@@ -1,0 +1,61 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Trackwise</title>
+  <link rel="stylesheet" href="popup.css">
+</head>
+<body>
+  <main class="app-shell">
+    <header class="topbar">
+      <div class="brand-mark" aria-hidden="true"><span></span><span></span><span></span></div>
+      <div class="brand-copy"><strong>Trackwise</strong><small>Employee activity</small></div>
+      <span class="product-pill"><i></i> Chrome extension</span>
+    </header>
+
+    <section class="hero">
+      <div class="hero-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M12 3v4m0 10v4M3 12h4m10 0h4M5.6 5.6l2.8 2.8m7.2 7.2 2.8 2.8m0-12.8-2.8 2.8m-7.2 7.2-2.8 2.8"/></svg></div>
+      <div><h1 id="headline">Connect your workspace</h1><p id="subhead">Use your existing Trackwise employee login to connect securely.</p></div>
+    </section>
+
+    <div id="connection" class="status-banner" role="status"><span class="status-dot"></span><span id="connectionText">Checking connection…</span></div>
+
+    <section id="login" class="connect-card">
+      <div class="step-row"><span class="step-number">1</span><div><strong>Sign in and start a session</strong><p>Open Trackwise in your browser and start your work session as an employee.</p></div></div>
+      <button id="openEmployeeLogin" class="button button-primary" type="button"><span>Open Trackwise</span><svg viewBox="0 0 24 24"><path d="M14 4h6v6m-1-5-9 9M18 13v6a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1h6"/></svg></button>
+      <div class="step-row step-second"><span class="step-number">2</span><div><strong>Connect automatically</strong><p>When your active session is ready, reopen this popup. Trackwise will detect your signed-in account.</p></div></div>
+      <button id="connectSignedIn" class="button button-secondary" type="button">Retry connection</button>
+      <details class="advanced"><summary>Advanced connection options</summary>
+        <label>API base URL<input id="api" type="url" value="http://localhost:5000/api/v1" required></label>
+        <form id="loginForm">
+          <label>Employee email<input id="email" type="email" autocomplete="username" placeholder="employee@company.com" required></label>
+          <label>Password<input id="password" type="password" autocomplete="current-password" placeholder="Enter password" required></label>
+          <button class="button button-secondary" type="submit">Connect with credentials</button>
+        </form>
+      </details>
+    </section>
+
+    <section id="connected" class="connected-card" hidden>
+      <div class="connected-heading"><div class="connected-avatar" id="avatar">T</div><div class="connected-person"><strong id="employeeName">Employee</strong><span>Employee session connected</span></div><span class="online-pill"><i></i> Connected</span></div>
+      <div class="current-domain"><span class="eyebrow">CURRENT DOMAIN</span><strong id="domain">Waiting for activity…</strong></div>
+      <div class="stats-grid">
+        <div class="stat"><span>Browser state</span><strong id="state">Unknown</strong></div>
+        <div class="stat"><span>Queued events</span><strong id="count">0</strong></div>
+        <div class="stat stat-wide"><span>Last successful sync</span><strong id="sync">Not synced yet</strong></div>
+      </div>
+      <section class="screenshot-monitor" aria-labelledby="screenshotTitle">
+        <strong id="screenshotTitle">Screenshot monitoring</strong>
+        <p id="screenshotStatus">Checking workspace policy…</p>
+        <p class="privacy-note">When enabled by your organization, Trackwise captures only the visible Chrome tab at the configured interval while your work session is active. Capture pauses during idle time and breaks. You must grant site access before screenshots can be captured.</p>
+        <button id="grantScreenshotAccess" class="button button-secondary" type="button">Review and grant site access</button>
+      </section>
+      <button id="disconnect" class="button button-danger" type="button">Disconnect extension</button>
+    </section>
+
+    <p id="message" class="message" role="status" aria-live="polite"></p>
+    <footer class="privacy"><svg viewBox="0 0 24 24"><path d="M12 3 19 6v5c0 5-3 8-7 10-4-2-7-5-7-10V6l7-3Z"/><path d="m9 12 2 2 4-4"/></svg><span><strong>Transparent monitoring</strong>Domain activity and idle status are tracked during an active session. If your organization enables screenshots, only the visible Chrome tab is captured according to the displayed policy.</span></footer>
+  </main>
+  <script src="popup.js"></script>
+</body>
+</html>

@@ -1,0 +1,32 @@
+{
+  "name": "employee-tracker-server",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "nodemon src/server.js",
+    "start": "node src/server.js",
+    "check": "node scripts/check.js",
+    "seed:demo": "node src/scripts/seedDemo.js",
+    "test:config": "node --test src/config/validateEnv.test.js",
+    "test:tracking": "node --test src/utils/trackingValidation.test.js",
+    "test": "node --test src/config/validateEnv.test.js src/utils/trackingValidation.test.js src/utils/userPolicy.test.js src/utils/dateRange.test.js src/middleware/csrf.test.js src/modules/screenshots/screenshots.test.js",
+    "test:screenshots": "node --test src/modules/screenshots/screenshots.test.js"
+  },
+  "dependencies": {
+    "bcryptjs": "^2.4.3",
+    "cookie-parser": "^1.4.7",
+    "cors": "^2.8.5",
+    "dotenv": "^16.4.7",
+    "express": "^4.21.2",
+    "express-rate-limit": "^7.5.0",
+    "helmet": "^8.0.0",
+    "jsonwebtoken": "^9.0.2",
+    "mongoose": "^8.9.5",
+    "cloudinary": "^2.5.1",
+    "multer": "^2.0.2"
+  },
+  "devDependencies": {
+    "nodemon": "^3.1.9"
+  }
+}

@@ -1,0 +1,44 @@
+{
+  "manifest_version": 3,
+  "name": "Trackwise Activity & Screenshot Monitor",
+  "version": "0.3.0",
+  "description": "Transparent session-based domain, idle, and visible-tab screenshot monitoring.",
+  "permissions": [
+    "alarms",
+    "idle",
+    "storage",
+    "tabs",
+    "cookies",
+    "webNavigation",
+    "scripting"
+  ],
+  "host_permissions": [
+    "http://localhost:5000/*",
+    "http://127.0.0.1:5000/*",
+    "http://localhost/*",
+    "http://127.0.0.1/*"
+  ],
+  "background": {
+    "service_worker": "background.js",
+    "type": "module"
+  },
+  "action": {
+    "default_title": "Trackwise",
+    "default_popup": "popup.html"
+  },
+  "optional_host_permissions": [
+    "<all_urls>"
+  ],
+  "content_scripts": [
+    {
+      "matches": [
+        "http://localhost/*",
+        "http://127.0.0.1/*"
+      ],
+      "js": [
+        "session-bridge.js"
+      ],
+      "run_at": "document_start"
+    }
+  ]
+}
