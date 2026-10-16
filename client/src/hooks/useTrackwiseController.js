@@ -1,4 +1,5 @@
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
+import { useLocation, useNavigate } from "react-router-dom";
 import { Activity, Clock3, Coffee, ShieldCheck, Users, RefreshCw, Plus, Download, CalendarDays, AlertTriangle, ChartNoAxesCombined, ArrowLeft, Search, Info, Settings, Camera, Gauge } from "lucide-react";
 import { api } from "../services/api";
 import { fetchCurrentUser, loginRequest, logoutRequest } from "../services/authService";
@@ -9,13 +10,16 @@ import { fetchBreakReport, fetchDailyReport, fetchEmployeeDomainEvents, fetchMyT
 import { fetchAuditLogs } from "../services/auditService";
 import { dateLabel, duration, today, dateInputValue } from "../utils/dateTime";
 import { toVisitRows } from "../utils/trackingEvents";
-import { parseRouteHash, routeHashForSection } from "../utils/routes";
+import { parseRoutePath, parseRouteHash, pathForSection } from "../utils/routes";
 import { Filters } from "../components/common/Filters";
 import { Empty } from "../components/common/EmptyState";
 import ActivityAnalyticsSection from "../components/pages/ActivityAnalyticsSection";
 import { buildDailyActivity, buildDomainActivity } from "../components/charts/ActivityCharts";
 export function useTrackwiseController() {
-    const initialRoute = parseRouteHash();
+    const location = useLocation();
+    const navigate = useNavigate();
+    const syncingFromUrl = useRef(false);
+    const initialRoute = parseRoutePath(location.pathname);
     const [user, setUser] = useState(null);
     const [email, setEmail] = useState("admin@example.com");
     const [password, setPassword] = useState("");
@@ -220,13 +224,34 @@ export function useTrackwiseController() {
             void loadSection(section, user);
     }, [section, user, from, to, loadSection]);
     useEffect(() => { setReportPage(1); }, [from, to, reportPageSize]);
-    // Keep the current section (and selected employee) in the URL so refresh/back/forward preserve context.
+    // Pathname is the source of truth. Legacy hash links are normalized to clean routes.
     useEffect(() => {
-        const hash = routeHashForSection(section, selectedEmployeeId);
-        if (window.location.hash !== hash) {
-            window.history.pushState(null, "", `${window.location.pathname}${window.location.search}${hash}`);
+        const legacy = parseRouteHash(location.hash);
+        const hasLegacyHash = Boolean(location.hash);
+        const route = hasLegacyHash ? legacy : parseRoutePath(location.pathname);
+        const targetSection = route.section;
+        const targetEmployeeId = route.employeeId ?? null;
+
+        if (hasLegacyHash) {
+            navigate(pathForSection(targetSection, targetEmployeeId), { replace: true });
+            setSection(targetSection);
+            setSelectedEmployeeId(targetEmployeeId);
+            return;
         }
-    }, [section, selectedEmployeeId]);
+
+        syncingFromUrl.current = true;
+        if (targetSection !== section) setSection(targetSection);
+        if ((targetEmployeeId ?? null) !== (selectedEmployeeId ?? null)) {
+            setSelectedEmployeeId(targetEmployeeId);
+        }
+    }, [location.pathname, location.hash, navigate]); // URL -> controller state
+
+    useEffect(() => {
+        const target = pathForSection(section, selectedEmployeeId);
+        if (location.pathname !== target || location.hash) {
+            navigate(target, { replace: false });
+        }
+    }, [section, selectedEmployeeId]); // controller state -> URL
     useEffect(() => {
         // Detail pages should always open at the top instead of inheriting the previous page scroll.
         window.scrollTo({ top: 0, left: 0, behavior: "auto" });
@@ -238,12 +263,6 @@ export function useTrackwiseController() {
             });
         }
     }, [section, selectedEmployeeId]);
-    useEffect(() => {
-        const onHashChange = () => { const route = parseRouteHash(); setSection(route.section); setSelectedEmployeeId(route.employeeId); };
-        window.addEventListener("hashchange", onHashChange);
-        window.addEventListener("popstate", onHashChange);
-        return () => { window.removeEventListener("hashchange", onHashChange); window.removeEventListener("popstate", onHashChange); };
-    }, []);
     async function loginWithCredentials(loginEmail, loginPassword) {
         setBusy(true);
         setMessage("");
